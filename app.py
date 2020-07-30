@@ -2,6 +2,7 @@
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 import dash
 import dash_core_components as dcc
@@ -63,28 +64,8 @@ app.layout = html.Div(
     ],
 )
 
-    # dcc.Dropdown(id="slct_year",
-                # options=[
-                    # {"label": "2016", "value": 'CPI 2016 Score'},
-                    # {"label": "2015", "value": 'CPI 2015 Score'},
-                    # {"label": "2014", "value": 'CPI 2014 Score'},
-                    # {"label": "2013", "value": 'CPI 2013 Score'},
-                    # {"label": "2012", "value": 'CPI 2012 Score'}],
-                # multi=False,
-                # value='CPI 2016 Score',
-                # style={'width': "40%"}
-                # ),
-# 
-    # html.Div(id='output_container', children=[]),
-    # html.Br(),
-# 
-    # dcc.Graph(id='cpi_map', figure={})
- 
-
-
 # Connect Plotly with Dash
 @app.callback(
-    # [Output(component_id='heatmap-container', component_property='children'),
     Output(component_id='cpi_map', component_property='figure'),
     [Input(component_id='chart-dropdown', component_property='value')]
 )
@@ -93,19 +74,34 @@ def update_graph(option_selected):
     print(option_selected)
     print(type(option_selected))
 
-
-
     dff = df.copy()
-    fig = px.choropleth(dff, locations="Country Code",
-                    color=option_selected, 
-                    hover_name="Country", # column to add to hover information
-                    color_continuous_scale=px.colors.sequential.Inferno,
-                    template='plotly_dark',
+    data = go.Choropleth(
+        locations=dff['Country Code'],
+        z=dff[option_selected],
+        text=dff['Country'],
+        colorscale=px.colors.sequential.Inferno,
+        autocolorscale=False,
+        marker_line_color='darkgray',
+        marker_line_width=0.5,
+        colorbar_title = 'Nivel de<br>corrupción<br>'
     )
+    fig = go.Figure(data)
+    fig.update_layout(
+        paper_bgcolor="#1f2630",
+        plot_bgcolor="#1f2630",
+        font=dict(color="#ffffff"),
+        geo=dict(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='equirectangular'
+        ),
+        height=600,
+        template='plotly_dark'
+    )
+    fig.layout.plot_bgcolor='#ffffff'
     return fig
 
 # Main function
-
-if __name__ == '__main__':
+if __name__ == '__main__': 
     app.run_server(debug=True)
-# http://127.0.0.1:8050/
+   # http://127.0.0.1:8050/
